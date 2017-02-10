@@ -1,0 +1,17 @@
+{
+    "name": "scissorhands/ci-cron-handler",
+    "description": "Codeigniter cronjob handler",
+    "type": "project",
+    "require": {
+        "scissorhands/ci-utilities": "^1.1",
+        "fzaninotto/faker": "^1.6"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Edward Scissorhands",
+            "email": "edward_beats@hotmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
