@@ -13,5 +13,10 @@
             "email": "edward_beats@hotmail.com"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "ciutil\\": "vendor/scissorhands/ci-utilities/"
+        }
+    }
 }
