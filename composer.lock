@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b2ec94353b152dadf3b8dfdc3d1a50a7",
-    "content-hash": "8e5a5df1a39a6897a117e11066945137",
+    "hash": "c46b2b2bd3700fd27584ebfe34e5b7f3",
+    "content-hash": "c20a44ca0dd3d64dab4d6ac50931ebf5",
     "packages": [
         {
             "name": "fzaninotto/faker",
-            "version": "dev-master",
+            "version": "v1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fzaninotto/Faker.git",
-                "reference": "a2dec96198bb146ffead806700074b0ec8d07f2f"
+                "reference": "44f9a286a04b80c76a4e5fb7aad8bb539b920123"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/a2dec96198bb146ffead806700074b0ec8d07f2f",
-                "reference": "a2dec96198bb146ffead806700074b0ec8d07f2f",
+                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/44f9a286a04b80c76a4e5fb7aad8bb539b920123",
+                "reference": "44f9a286a04b80c76a4e5fb7aad8bb539b920123",
                 "shasum": ""
             },
             "require": {
@@ -31,9 +31,7 @@
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-master": "1.6.x-dev"
-                }
+                "branch-alias": []
             },
             "autoload": {
                 "psr-4": {
@@ -55,20 +53,20 @@
                 "faker",
                 "fixtures"
             ],
-            "time": "2017-02-01 09:18:35"
+            "time": "2016-04-29 12:21:54"
         },
         {
             "name": "scissorhands/ci-utilities",
-            "version": "1.1.1",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/scissorhands/ci-utilities.git",
-                "reference": "a9972a5a268e2445f8db2a968f0e63b6ef1ffe59"
+                "reference": "1d114baae21ec283d9221f6ced50b1ed9c6aa7e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/scissorhands/ci-utilities/zipball/a9972a5a268e2445f8db2a968f0e63b6ef1ffe59",
-                "reference": "a9972a5a268e2445f8db2a968f0e63b6ef1ffe59",
+                "url": "https://api.github.com/repos/scissorhands/ci-utilities/zipball/1d114baae21ec283d9221f6ced50b1ed9c6aa7e3",
+                "reference": "1d114baae21ec283d9221f6ced50b1ed9c6aa7e3",
                 "shasum": ""
             },
             "require": {
@@ -86,7 +84,7 @@
                 }
             ],
             "description": "Some utilities to work on CodeIgniter Framework",
-            "time": "2017-02-10 23:35:11"
+            "time": "2017-02-13 18:42:24"
         }
     ],
     "packages-dev": [],
