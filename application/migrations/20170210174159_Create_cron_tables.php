@@ -99,7 +99,7 @@ class Migration_Create_cron_tables extends \CI_Migration {
 				'constraint' => 11,
 				'insigned' => true
 			],
-			'total_processes' => [
+			'total_threads' => [
 				'type' => 'INT',
 				'constraint' => 11,
 				'insigned' => true
