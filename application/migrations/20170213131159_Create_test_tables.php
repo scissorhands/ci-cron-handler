@@ -7,6 +7,7 @@ class Migration_Create_test_tables extends CI_Migration {
 	{
 		$this->load->dbforge();
 		$this->load->database();
+		$this->load->model('utilities_model', 'util');
 	}
 
 	public function up() {
@@ -38,17 +39,17 @@ class Migration_Create_test_tables extends CI_Migration {
 				'type' => 'DOUBLE',
 				'insigned' => true
 			],
-		])->add_key('id', true);
+		])->add_key(['test_provider_id', 'stats_date'], true);
 		$this->dbforge->create_table('test_provider_stats', true);
 
 		$faker = Faker\Factory::create();
 		for( $i =0 ; $i<1500 ; $i++){
-			$this->db->insert('test_provider', [
+			$this->util->generic_insert('test_provider', [
 				'name' => $faker->name
 			]);
 		}
 
-		$this->db->insert('cron_tasks',[
+		$this->util->generic_insert('cron_tasks',[
 			'name' => 'ETL example',
 			'provider_table' => 'test_provider',
 			'provider_id' => 'id',
