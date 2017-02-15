@@ -90,9 +90,10 @@ class Cron_handler_model extends CI_Model {
 		while ($index != $this->thread->to && $index < $this->thread->to) {
 			$next_index = $index+$offset;
 			$next_index = $next_index < $this->thread->to? $next_index : $this->thread->to;
-			$provider_rows = $this->get_paginated_providers($index, $next_index);
+			
+			$provider_rows = $this->get_paginated_providers($index, $offset);
 			foreach ($provider_rows as $row) {
-				$this->etl_model->{$this->task->etl_function}( $row );
+				$this->etl_model->{$this->task->etl_function}( $row, $this->date );
 			}
 			if(!$this->debug_mode){
 				$this->insert_thread_log( $next_index );
@@ -153,12 +154,12 @@ class Cron_handler_model extends CI_Model {
 		->count_all_results();
 	}
 
-	public function get_paginated_providers($index, $limit)
+	public function get_paginated_providers($index, $offset)
 	{
 		return $this->db->from("{$this->task->provider_table} AS provider")
 		->group_by("provider.{$this->task->provider_id}")
 		->order_by("provider.{$this->task->provider_id}", 'ASC')
-		->limit($limit, $index)
+		->limit($offset, $index)
 		->get()->result();
 	}
 
