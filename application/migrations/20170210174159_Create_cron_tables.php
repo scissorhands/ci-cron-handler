@@ -140,7 +140,8 @@ class Migration_Create_cron_tables extends \CI_Migration {
 				'type' => 'TINYINT',
 				'default' => false
 			],
-			'last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+			'last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+			'started_at TIMESTAMP DEFAULT NULL'
 		])
 		->add_key('id', true)
 		->add_key(['cron_task_tracking_id', 'date'])

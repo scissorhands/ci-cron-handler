@@ -11,8 +11,16 @@ class Retriever extends CI_Controller {
 
 	public function index()
 	{
-		$this->cron_handler->debug_mode();
-		$this->cron_handler->generate_thread('ETL example');
+		// $this->cron_handler->debug_mode();
+		$data = $this->cron_handler->run_task('ETL example');
+		dump( $data, false );
+	}
+
+
+	public function reset()
+	{
+		$this->cron_handler->reset_task('ETL example');
+		
 	}
 
 
