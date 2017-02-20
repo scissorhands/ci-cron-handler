@@ -264,6 +264,29 @@ class Cron_handler_model extends CI_Model {
 		->get()->result();
 	}
 
+	public function reset_task( $task_name )
+	{
+		$task = $this->util->get('cron_tasks', ['name'=>$task_name]);
+		$task->tracking = $this->util->get('cron_task_tracking', [
+			'cron_task_id'=>$task->id,
+			'date'=>$this->date
+		]);
+		if( $task->tracking ){
+			$task->tracking->threads = $this->util->get('cron_task_threads', ['cron_task_tracking_id'=> $task->tracking->id], true);
+			if($task->tracking->threads){
+				foreach ($task->tracking->threads as $thread) {
+					$this->util->generic_delete('cron_task_thread_tracking', ['thread_id'=>$thread->id]);
+				}
+				$this->util->generic_delete('cron_task_threads', ['cron_task_tracking_id'=> $task->tracking->id]);
+			}
+			$this->util->generic_delete('cron_task_tracking', [
+				'cron_task_id'=>$task->id,
+				'date'=>$this->date
+			]);
+		}
+		dump($task);
+	}
+
 }
 
 /* End of file Cron_handler_model.php */
