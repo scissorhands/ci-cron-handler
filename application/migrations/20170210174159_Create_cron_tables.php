@@ -1,4 +1,5 @@
 <?php
+namespace Scissorhands\CiCronHandler\Migrations;
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Migration_Create_cron_tables extends \CI_Migration {
@@ -118,8 +119,10 @@ class Migration_Create_cron_tables extends \CI_Migration {
 
 		$this->dbforge->add_field([
 			'id' => [
-				'type' => 'VARCHAR',
-				'constraint' => 32
+				'type' => 'INT',
+				'constraint' => 11,
+				'auto_increment' => true,
+				'insigned' => true
 			],
 			'cron_task_tracking_id' => [
 				'type' => 'INT',
@@ -150,8 +153,9 @@ class Migration_Create_cron_tables extends \CI_Migration {
 
 		$this->dbforge->add_field([
 			'thread_id' => [
-				'type' => 'VARCHAR',
-				'constraint' => 32
+				'type' => 'INT',
+				'constraint' => 11,
+				'insigned' => true
 			],
 			'current' => [
 				'type' => 'INT',

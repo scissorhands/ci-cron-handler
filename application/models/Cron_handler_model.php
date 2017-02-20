@@ -1,7 +1,8 @@
 <?php
+namespace Scissorhands\CiCronHandler\Models;
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Cron_handler_model extends CI_Model {
+class Cron_handler_model extends \CI_Model {
 	private $task = null;
 	private $task_tracking = null;
 	private $thread = null;
@@ -26,20 +27,23 @@ class Cron_handler_model extends CI_Model {
 		$this->date = $date;
 	}
 
-	public function set_task( $task = null )
+	private function set_task( $id = null )
 	{
-		if(!$task){ 
-			throw new Exception("Error: No task was found under the given name", 1);
+		if(!$id){ 
+			throw new Exception("Error: Task id is mandatory", 1);
+		}
+		$task = $this->util->get('cron_tasks', ['id'=>$id]);
+		if(!$task){
+			throw new Exception("Error: Task not found", 1);
 		}
 		$this->task = $task;
 	}
 
-	public function run_task( $task_name )
+	public function run_task( $id = null )
 	{
-		$task = $this->util->get('cron_tasks', ['name'=>$task_name]);
-		$this->set_task( $task );
+		$this->set_task( $id );
 		$this->task_tracking = $this->util->get('cron_task_tracking', [
-			'cron_task_id'=>$task->id,
+			'cron_task_id'=>$this->task->id,
 			'date'=>$this->date
 		]);
 		if( !$this->task_tracking ){
@@ -56,28 +60,26 @@ class Cron_handler_model extends CI_Model {
 					$this->init_thread();
 				} else {
 					$unfinished_threads = $this->get_unfinished_threads();
-					$thread_indexes = [];
 					foreach ($unfinished_threads as $unfinished) {
-						$last_log = $this->get_last_thread_tracking( $unfinished->id );
-						dump( $last_log, false );
-						// $thread_indexes[$unfinished->id] = 
+						$unfinished->last_log = $this->get_last_thread_tracking( $unfinished->id );
 					}
-					sleep(10);
+					sleep(15);
 					foreach ($unfinished_threads as $unfinished) {
 						$last_log = $this->get_last_thread_tracking( $unfinished->id );
-						dump( $last_log, false );
-						if( $last_log->current == $thread_indexes[$unfinished->id] ){
+						if( $unfinished->last_log && $last_log->current == $unfinished->last_log->current ){
 							$unfinished->current = $last_log->current;
 							$this->thread = $unfinished;
-							continue;
+							break;
+						} else {
+							$unfinished->current = null;
+							$this->thread = $unfinished;
+							break;
 						}
-						// $thread_indexes[$unfinished->id] = 
 					}
 				}
 				break;
 			case 'ENDED':
-				break;
-			case 'ERROR':
+				// Do nothing
 				break;
 			default:
 				exit('Uncaught tracking status');
@@ -95,7 +97,7 @@ class Cron_handler_model extends CI_Model {
 		];
 	}
 
-	public function status_check()
+	private function status_check()
 	{
 		$threads = $this->get_fired_threads();
 		$unfinished_threads = $this->get_unfinished_threads();
@@ -110,7 +112,7 @@ class Cron_handler_model extends CI_Model {
 		];
 	}
 
-	public function get_fired_threads()
+	private function get_fired_threads()
 	{
 		$query = $this->db->from('cron_task_threads')
 		->where('cron_task_tracking_id',$this->task_tracking->id)
@@ -118,7 +120,7 @@ class Cron_handler_model extends CI_Model {
 		return $query->result();
 	}
 
-	public function get_unfinished_threads()
+	private function get_unfinished_threads()
 	{
 		$query = $this->db->from('cron_task_threads')
 		->where('cron_task_tracking_id', $this->task_tracking->id)
@@ -127,16 +129,16 @@ class Cron_handler_model extends CI_Model {
 		return $query->result();
 	}
 
-	public function get_last_thread_tracking( $thread_id )
+	private function get_last_thread_tracking( $thread_id )
 	{
-		$query = $this->db->where('id',$thread_id)
+		$query = $this->db->where('thread_id',$thread_id)
 		->from('cron_task_thread_tracking')
-		->order_by('started_at', 'DESC')
+		->order_by('current,log_timestamp', 'DESC')
 		->get();
 		return $query->result() ? $query->row() : null;
 	}
 
-	public function update_tracking_status( $status )
+	private function update_tracking_status( $status )
 	{
 		$this->util->generic_update('cron_task_tracking', 
 			['id'=>$this->task_tracking->id], 
@@ -145,7 +147,7 @@ class Cron_handler_model extends CI_Model {
 		$this->task_tracking = $this->db->where('id', $this->task_tracking->id)->get('cron_task_tracking')->row();
 	}
 
-	public function run_thread()
+	private function run_thread()
 	{
 		try {
 			$this->load->model( $this->task->etl_model, 'etl_model');
@@ -156,6 +158,7 @@ class Cron_handler_model extends CI_Model {
 		$offset = $this->task->thread_tracking_interval? 
 			$this->task->thread_tracking_interval: 
 			$this->thread->to;
+		$error_flag = false;
 
 		while ($index != $this->thread->to && $index < $this->thread->to) {
 			$next_index = $index+$offset;
@@ -163,26 +166,32 @@ class Cron_handler_model extends CI_Model {
 
 			$provider_rows = $this->get_paginated_providers($index, $offset);
 			foreach ($provider_rows as $row) {
-				$this->etl_model->{$this->task->etl_function}( $row, $this->date );
+				try {
+					$this->etl_model->{$this->task->etl_function}( $row, $this->date );
+				} catch (Exception $e) {
+					// Log this error;
+					$error_flag = true;
+					break 2;
+				}
 			}
 			if(!$this->debug_mode){
 				$this->insert_thread_log( $next_index );
 			}
 			$index = $next_index;
 		}
-		if( !$this->debug_mode ){
+		if( !$this->debug_mode && !$error_flag ){
 			$this->set_thread_done();
 		}
 	}
 
-	public function set_thread_done()
+	private function set_thread_done()
 	{
 		$where_clause = ['id'=>$this->thread->id];
 		$this->util->generic_update('cron_task_threads', $where_clause, ['done' => true]);
 		$this->thread = $this->util->get('cron_task_threads', $where_clause );
 	}
 
-	public function insert_thread_log( $current )
+	private function insert_thread_log( $current )
 	{
 		$this->util->generic_insert('cron_task_thread_tracking', [
 			'thread_id' => $this->thread->id,
@@ -190,25 +199,24 @@ class Cron_handler_model extends CI_Model {
 		]);
 	}
 
-	public function init_thread( $from = 0 )
+	private function init_thread()
 	{
 		$this->thread = $this->get_last_started_thread();
 		$range = $this->get_range();
 		$new_thread = [
-			'id' => uniqid(),
 			'cron_task_tracking_id' => $this->task_tracking->id,
 			'from' => $range->from,
 			'to' => $range->to,
 			'started_at' => date('Y-m-d H:i:s')
 		];
 		if( !$this->debug_mode ){
-			$id = $this->util->generic_insert('cron_task_threads', $new_thread);
+			$new_thread['id'] = $this->util->generic_insert('cron_task_threads', $new_thread);
 		}
 		$new_thread['current'] = null;
 		$this->thread = (Object)$new_thread;
 	}
 
-	public function get_last_started_thread()
+	private function get_last_started_thread()
 	{
 		$query = $this->db->from('cron_task_threads')
 		->where('cron_task_tracking_id',$this->task_tracking->id)
@@ -216,7 +224,7 @@ class Cron_handler_model extends CI_Model {
 		return $query->result()? $query->row() : null;
 	}
 
-	public function get_range()
+	private function get_range()
 	{
 		if(!$this->thread) {
 			$from = 0;
@@ -248,14 +256,14 @@ class Cron_handler_model extends CI_Model {
 		return $this->util->get('cron_task_tracking', ['id' => $id]);
 	}
 
-	public function get_total_providers()
+	private function get_total_providers()
 	{
 		return $this->db->from("{$this->task->provider_table} AS provider")
 		->group_by("provider.{$this->task->provider_id}")
 		->count_all_results();
 	}
 
-	public function get_paginated_providers($index, $offset)
+	private function get_paginated_providers($index, $offset)
 	{
 		return $this->db->from("{$this->task->provider_table} AS provider")
 		->group_by("provider.{$this->task->provider_id}")
@@ -284,7 +292,31 @@ class Cron_handler_model extends CI_Model {
 				'date'=>$this->date
 			]);
 		}
-		dump($task);
+		return $task;
+	}
+
+	public function monitor( $id )
+	{
+		$task = $this->util->get('cron_tasks', ['id'=>$id]);
+		$task->tracking = $this->util->get('cron_task_tracking', [
+			'cron_task_id'=>$task->id,
+			'date'=>$this->date
+		]);
+		if( $task->tracking ){
+			$task->tracking->threads = $this->util->get('cron_task_threads', ['cron_task_tracking_id'=> $task->tracking->id], true);
+			if($task->tracking->threads){
+				foreach ($task->tracking->threads as $thread) {
+					$thread->logs = $this->util->get('cron_task_thread_tracking', ['thread_id'=>$thread->id], true);
+				}
+			}
+		}
+		return $task;
+	}
+
+	public function get_tasks()
+	{
+		$tasks = $this->util->get('cron_tasks', [], true);
+		return $tasks;
 	}
 
 }
