@@ -2,7 +2,7 @@
 namespace Scissorhands\application\migrations;
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Migration_Create_test_tables extends \CI_Migration {
+class Create_test_tables extends \CI_Migration {
 
 	public function __construct()
 	{
