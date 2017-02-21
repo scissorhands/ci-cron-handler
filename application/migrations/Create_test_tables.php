@@ -43,7 +43,7 @@ class Create_test_tables extends \CI_Migration {
 		])->add_key(['test_provider_id', 'stats_date'], true);
 		$this->dbforge->create_table('test_provider_stats', true);
 
-		$faker = Faker\Factory::create();
+		$faker = \Faker\Factory::create();
 		for( $i =0 ; $i<1500 ; $i++){
 			$this->util->generic_insert('test_provider', [
 				'name' => $faker->name
