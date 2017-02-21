@@ -13,7 +13,7 @@ class Retriever extends \CI_Controller {
 	{
 		if($id){
 			$data = $this->cron_handler->run_task($id);
-			dump( $data, false );
+			exit( json_encode($data) );
 		}
 	}
 
@@ -21,20 +21,20 @@ class Retriever extends \CI_Controller {
 	{
 		if($id){
 			$data = $this->cron_handler->reset_task('ETL example');
-			dump( $data, false );
+			exit( json_encode($data) );
 		}
 	}
 
 	public function get_tasks()
 	{
 		$tasks = $this->cron_handler->get_tasks();
-		dump( $tasks, false );
+		exit( json_encode($tasks) );
 	}
 
 	public function monitor( $id = 1 )
 	{
 		$data = $this->cron_handler->monitor($id);
-		dump( $data, false );
+		exit( json_encode($data) );
 	}
 
 }
