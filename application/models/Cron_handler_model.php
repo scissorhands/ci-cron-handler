@@ -1,5 +1,5 @@
 <?php
-namespace Scissorhands\CiCronHandler\Models;
+namespace Scissorhands\application\models;
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Cron_handler_model extends \CI_Model {

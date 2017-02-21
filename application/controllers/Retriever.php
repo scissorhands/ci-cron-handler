@@ -1,5 +1,5 @@
 <?php
-namespace Scissorhands\CiCronHandler\Controllers;
+namespace Scissorhands\application\controllers;
 defined('BASEPATH') OR exit('No direct script access allowed');
 class Retriever extends \CI_Controller {
 

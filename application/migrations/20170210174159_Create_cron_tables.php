@@ -1,5 +1,5 @@
 <?php
-namespace Scissorhands\CiCronHandler\Migrations;
+namespace Scissorhands\application\migrations;
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Migration_Create_cron_tables extends \CI_Migration {
