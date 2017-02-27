@@ -307,7 +307,11 @@ class Cron_handler_model extends \CI_Model {
 			$task->tracking->threads = $this->util->get('cron_task_threads', ['cron_task_tracking_id'=> $task->tracking->id], true);
 			if($task->tracking->threads){
 				foreach ($task->tracking->threads as $thread) {
-					$thread->logs = $this->util->get('cron_task_thread_tracking', ['thread_id'=>$thread->id], true);
+					$logs = $this->util->get('cron_task_thread_tracking', ['thread_id'=>$thread->id], true);
+					$thread->logs = Object[
+						'total' => count($logs),
+						'last' => end($logs)
+					];
 				}
 			}
 		}
