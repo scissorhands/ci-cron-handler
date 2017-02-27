@@ -258,9 +258,10 @@ class Cron_handler_model extends \CI_Model {
 
 	private function get_total_providers()
 	{
-		return $this->db->from("{$this->task->provider_table} AS provider")
+		$query = $this->db->from("{$this->task->provider_table} AS provider")
 		->group_by("provider.{$this->task->provider_id}")
-		->count_all_results();
+		->get();
+		return $query->num_rows();
 	}
 
 	private function get_paginated_providers($index, $offset)
