@@ -164,15 +164,19 @@ class Cron_handler_model extends \CI_Model {
 			$next_index = $index+$offset;
 			$next_index = $next_index < $this->thread->to? $next_index : $this->thread->to;
 
-			$provider_rows = $this->get_paginated_providers($index, $offset);
-			foreach ($provider_rows as $row) {
-				try {
-					$this->etl_model->{$this->task->etl_function}( $row, $this->date );
-				} catch (Exception $e) {
-					// Log this error;
-					$error_flag = true;
-					break 2;
+			if( $this->task->provider_table || $this->task->custom_provider ){
+				$provider_rows = $this->get_paginated_providers($index, $offset);
+				foreach ($provider_rows as $row) {
+					try {
+						$this->etl_model->{$this->task->etl_function}( $row, $this->date );
+					} catch (Exception $e) {
+						// Log this error;
+						$error_flag = true;
+						break 2;
+					}
 				}
+			} else {
+				$this->etl_model->{$this->task->etl_function}( $this->date );
 			}
 			if(!$this->debug_mode){
 				$this->insert_thread_log( $next_index );
@@ -242,8 +246,13 @@ class Cron_handler_model extends \CI_Model {
 
 	private function init_tracking()
 	{
-		$total_providers = $this->get_total_providers();
-		$total_threads = ceil($total_providers / $this->task->thread_interval);
+		if( $this->task->provider_table || $this->task->custom_provider ){
+			$total_providers = $this->get_total_providers();
+			$total_threads = ceil($total_providers / $this->task->thread_interval);
+		} else {
+			$total_providers = 1;
+			$total_threads = 1; 
+		}
 		$new_task_tracking = [
 			'cron_task_id' => $this->task->id,
 			'date' => $this->date,
@@ -308,10 +317,14 @@ class Cron_handler_model extends \CI_Model {
 			if($task->tracking->threads){
 				foreach ($task->tracking->threads as $thread) {
 					$logs = $this->util->get('cron_task_thread_tracking', ['thread_id'=>$thread->id], true);
-					$thread->logs = (Object)[
-						'total' => count($logs),
-						'last' => end($logs)
-					];
+					if($logs){
+						$thread->logs = (Object)[
+							'total' => count($logs),
+							'last' => end($logs)
+						];
+					} else {
+						$thread->logs = null;
+					}
 				}
 			}
 		}
