@@ -285,6 +285,7 @@ class Cron_handler_model extends \CI_Model {
 	public function reset_task( $task_name )
 	{
 		$task = $this->util->get('cron_tasks', ['name'=>$task_name]);
+		if(!$task){ return []; }
 		$task->tracking = $this->util->get('cron_task_tracking', [
 			'cron_task_id'=>$task->id,
 			'date'=>$this->date
@@ -335,6 +336,29 @@ class Cron_handler_model extends \CI_Model {
 	{
 		$tasks = $this->util->get('cron_tasks', [], true);
 		return $tasks;
+	}
+
+	public function get_filtered( $fields = 'id, name', $filter = null, $start = null, $length = null, $sorting = null )
+	{
+		if($filter){
+			$where_filter = "name LIKE '%%' OR provider_table LIKE '%%' OR etl_function LIKE '%%'";
+		}
+		$this->db->select($fields, false)
+		->from("cron_tasks AS CT");
+
+		if( $filter && $start != null && $length ){
+			$this->db->where($where_filter)
+			->limit($length, $start);
+		} else if( $start != null && $length ){
+			$this->db->limit($length, $start);
+		} else if( $filter ){
+			$this->db->where($where_filter);
+		}
+		if( $sorting ){
+			$this->db->order_by($sorting['field'], $sorting['sort_dir']);
+		}
+		$query = $this->db->get(); 
+		return $query->result();
 	}
 
 }

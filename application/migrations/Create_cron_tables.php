@@ -81,6 +81,21 @@ class Create_cron_tables extends \CI_Migration {
 		$this->dbforge->create_table('cron_tasks', true);
 
 		$this->dbforge->add_field([
+			'dependant_task_id' => [
+				'type' => 'INT',
+				'constraint' => 11,
+				'insigned' => true
+			],
+			'dependency_task_id' => [
+				'type' => 'INT',
+				'constraint' => 11,
+				'insigned' => true
+			]
+		])
+		->add_key(['dependant_task_id', 'dependency_task_id'], true);
+		$this->dbforge->create_table('cron_task_dependencies', true);
+
+		$this->dbforge->add_field([
 			'id' => [
 				'type' => 'INT',
 				'constraint' => 11,
@@ -106,8 +121,7 @@ class Create_cron_tables extends \CI_Migration {
 				'insigned' => true
 			],
 			'status' => [
-				'type' => 'ENUM',
-				'constraint' => [ 'UNSTARTED', 'STARTED', 'ENDED', 'ERROR']
+				'type' => "ENUM('UNSTARTED', 'STARTED', 'ENDED', 'ERROR')"
 			],
 			'last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
 			'started_at TIMESTAMP DEFAULT NULL'
@@ -170,6 +184,7 @@ class Create_cron_tables extends \CI_Migration {
 
 	public function down() {
 		$this->dbforge->drop_table('cron_tasks', true);
+		$this->dbforge->drop_table('cron_task_dependencies', true);
 		$this->dbforge->drop_table('cron_task_tracking', true);
 		$this->dbforge->drop_table('cron_task_threads', true);
 		$this->dbforge->drop_table('cron_task_thread_tracking', true);
