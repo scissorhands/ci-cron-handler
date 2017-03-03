@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c46b2b2bd3700fd27584ebfe34e5b7f3",
-    "content-hash": "c20a44ca0dd3d64dab4d6ac50931ebf5",
+    "hash": "2bee1c988ae3023638e50af78b43e4d7",
+    "content-hash": "1aacac5c98310a1254156ea229c128d4",
     "packages": [
         {
             "name": "fzaninotto/faker",
@@ -57,16 +57,16 @@
         },
         {
             "name": "scissorhands/ci-utilities",
-            "version": "1.1.2",
+            "version": "1.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/scissorhands/ci-utilities.git",
-                "reference": "1d114baae21ec283d9221f6ced50b1ed9c6aa7e3"
+                "reference": "923de24baecdfea20ed35a1bc5a24342a2766117"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/scissorhands/ci-utilities/zipball/1d114baae21ec283d9221f6ced50b1ed9c6aa7e3",
-                "reference": "1d114baae21ec283d9221f6ced50b1ed9c6aa7e3",
+                "url": "https://api.github.com/repos/scissorhands/ci-utilities/zipball/923de24baecdfea20ed35a1bc5a24342a2766117",
+                "reference": "923de24baecdfea20ed35a1bc5a24342a2766117",
                 "shasum": ""
             },
             "require": {
@@ -84,7 +84,7 @@
                 }
             ],
             "description": "Some utilities to work on CodeIgniter Framework",
-            "time": "2017-02-13 18:42:24"
+            "time": "2017-03-02 19:40:12"
         }
     ],
     "packages-dev": [],
