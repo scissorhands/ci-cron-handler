@@ -14,7 +14,7 @@ class Retriever extends \CI_Controller {
 	{
 		if($id){
 			$data = $this->cron_handler->run_task($id);
-			dump( $data );
+			cron_response( $data );
 		}
 	}
 
@@ -22,7 +22,6 @@ class Retriever extends \CI_Controller {
 	{
 		if($name){
 			$task = $this->util->get('cron_tasks', ['name'=>$name]);
-			// exit($name);
 			if($task){
 				$this->run( $task->id );
 			} else {
@@ -35,20 +34,20 @@ class Retriever extends \CI_Controller {
 	{
 		if($id){
 			$data = $this->cron_handler->reset_task($id);
-			exit( json_encode($data) );
+			cron_response( $data );
 		}
 	}
 
 	public function get_tasks()
 	{
 		$tasks = $this->cron_handler->get_tasks();
-		exit( json_encode($tasks) );
+		cron_response( $data );
 	}
 
 	public function monitor( $id = 1 )
 	{
 		$data = $this->cron_handler->monitor($id);
-		exit( json_encode($data) );
+		cron_response( $data );
 	}
 
 }

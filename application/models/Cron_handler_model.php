@@ -47,6 +47,12 @@ class Cron_handler_model extends \CI_Model {
 			$this->task->unfinished_dependencies = $unfinished;
 			return $this->task;
 		}
+		$current_time =  date('H:m:i');
+		if( !has_time_passed($this->task->start_time, $current_time) ){
+			$this->task->message = "Start time is at {$this->task->start_time}";
+			return $this->task;
+		}
+
 		$this->task_tracking = $this->util->get('cron_task_tracking', [
 			'cron_task_id'=>$this->task->id,
 			'date'=>$this->date
@@ -56,10 +62,16 @@ class Cron_handler_model extends \CI_Model {
 		}
 		switch ($this->task_tracking->status) {
 			case 'UNSTARTED':
+				if( has_time_passed($this->task->alert_time, $current_time) ){
+					// this trigers alert
+				}
 				$this->init_thread();
 				$this->update_tracking_status('STARTED');
 				break;
 			case 'STARTED':
+				if( has_time_passed($this->task->alert_time, $current_time) ){
+					// this trigers alert
+				}
 				$threads = $this->get_fired_threads();
 				if( count($threads) < $this->task_tracking->total_threads ){
 					$this->init_thread();
