@@ -42,6 +42,11 @@ class Cron_handler_model extends \CI_Model {
 	public function run_task( $id = null )
 	{
 		$this->set_task( $id );
+		$unfinished = $this->get_unfinished_dependencies();
+		if($unfinished){
+			$this->task->unfinished_dependencies = $unfinished;
+			return $this->task;
+		}
 		$this->task_tracking = $this->util->get('cron_task_tracking', [
 			'cron_task_id'=>$this->task->id,
 			'date'=>$this->date
@@ -282,10 +287,11 @@ class Cron_handler_model extends \CI_Model {
 		->get()->result();
 	}
 
-	public function reset_task( $task_name )
+	public function reset_task( $id )
 	{
-		$task = $this->util->get('cron_tasks', ['name'=>$task_name]);
-		if(!$task){ return []; }
+		$task = $this->util->get('cron_tasks', ['id'=>$id]);
+		if(!$task){ throw new Exception("Unknown task", 1);
+		 }
 		$task->tracking = $this->util->get('cron_task_tracking', [
 			'cron_task_id'=>$task->id,
 			'date'=>$this->date
@@ -358,6 +364,47 @@ class Cron_handler_model extends \CI_Model {
 			$this->db->order_by($sorting['field'], $sorting['sort_dir']);
 		}
 		$query = $this->db->get(); 
+		return $query->result();
+	}
+
+	public function get_unfinished_dependencies()
+	{
+		$unfinished = $this->get_dependencies_status();
+		$dependencies = [];
+		foreach ($unfinished as $row) {
+			if(!$row->done){
+				$dependencies[] = $this->get_task_status($row->id);
+			}
+		}
+		return $dependencies;
+	}
+
+	public function get_task_status( $id )
+	{
+		$query = $this->db->select('CT.name AS task_name, CTT.status')
+		->from('cron_tasks AS CT')
+		->join("(
+			SELECT * 
+			FROM cron_task_tracking
+			WHERE date = '{$this->date}'
+			) AS CTT",'CT.id=CTT.cron_task_id', 'left')
+		->get();
+		return $query->result() ? $query->row() : null;
+	}
+
+	public function get_dependencies_status()
+	{
+		$query = $this->db->select('CT.id, CT.name, CTD.dependency_task_id AS dependency, CTT.id AS done', false)
+		->from('cron_tasks AS CT')
+		->join('cron_task_dependencies AS CTD', 'CT.id=CTD.dependant_task_id')
+		->join("(
+			SELECT * 
+			FROM cron_task_tracking
+			WHERE date = '{$this->date}'
+			AND status = 'ENDED'
+			) AS CTT", 'CTD.dependency_task_id=CTT.cron_task_id', 'left')
+		->where('CT.id', $this->task->id)
+		->get();
 		return $query->result();
 	}
 

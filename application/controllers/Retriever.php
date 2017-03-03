@@ -1,6 +1,7 @@
 <?php
 namespace Scissorhands\application\controllers;
 defined('BASEPATH') OR exit('No direct script access allowed');
+require_once(__DIR__.'/../../../ci-utilities/helpers/utilities.php');
 class Retriever extends \CI_Controller {
 
 	public function __construct()
@@ -13,14 +14,27 @@ class Retriever extends \CI_Controller {
 	{
 		if($id){
 			$data = $this->cron_handler->run_task($id);
-			exit( json_encode($data) );
+			dump( $data );
+		}
+	}
+
+	public function run_by_name( $name = null )
+	{
+		if($name){
+			$task = $this->util->get('cron_tasks', ['name'=>$name]);
+			// exit($name);
+			if($task){
+				$this->run( $task->id );
+			} else {
+				throw new Exception("Unknown task", 1);
+			}
 		}
 	}
 
 	public function reset( $id = null )
 	{
 		if($id){
-			$data = $this->cron_handler->reset_task('ETL example');
+			$data = $this->cron_handler->reset_task($id);
 			exit( json_encode($data) );
 		}
 	}
