@@ -41,7 +41,7 @@ class Retriever extends \CI_Controller {
 	public function get_tasks()
 	{
 		$tasks = $this->cron_handler->get_tasks();
-		cron_response( $data );
+		cron_response( $tasks );
 	}
 
 	public function monitor( $id = 1 )
