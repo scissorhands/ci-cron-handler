@@ -30,11 +30,11 @@ class Cron_handler_model extends \CI_Model {
 	private function set_task( $id = null )
 	{
 		if(!$id){ 
-			throw new Exception("Error: Task id is mandatory", 1);
+			throw new \Exception("Error: Task id is mandatory", 1);
 		}
 		$task = $this->util->get('cron_tasks', ['id'=>$id]);
 		if(!$task){
-			throw new Exception("Error: Task not found", 1);
+			throw new \Exception("Error: Task not found", 1);
 		}
 		$this->task = $task;
 	}
@@ -168,7 +168,7 @@ class Cron_handler_model extends \CI_Model {
 	{
 		try {
 			$this->load->model( $this->task->etl_model, 'etl_model');
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			exit(json_encode(['error'=>$e->getMessage()]));
 		}
 		$index = $this->thread->current? $this->thread->current : $this->thread->from;
@@ -186,7 +186,7 @@ class Cron_handler_model extends \CI_Model {
 				foreach ($provider_rows as $row) {
 					try {
 						$this->etl_model->{$this->task->etl_function}( $row, $this->date );
-					} catch (Exception $e) {
+					} catch (\Exception $e) {
 						// Log this error;
 						$error_flag = true;
 						break 2;
@@ -302,7 +302,7 @@ class Cron_handler_model extends \CI_Model {
 	public function reset_task( $id )
 	{
 		$task = $this->util->get('cron_tasks', ['id'=>$id]);
-		if(!$task){ throw new Exception("Unknown task", 1);
+		if(!$task){ throw new \Exception("Unknown task", 1);
 		 }
 		$task->tracking = $this->util->get('cron_task_tracking', [
 			'cron_task_id'=>$task->id,
@@ -385,7 +385,7 @@ class Cron_handler_model extends \CI_Model {
 		$dependencies = [];
 		foreach ($unfinished as $row) {
 			if(!$row->done){
-				$dependencies[] = $this->get_task_status($row->id);
+				$dependencies[] = $this->get_task_status($row->dependency);
 			}
 		}
 		return $dependencies;
@@ -400,6 +400,7 @@ class Cron_handler_model extends \CI_Model {
 			FROM cron_task_tracking
 			WHERE date = '{$this->date}'
 			) AS CTT",'CT.id=CTT.cron_task_id', 'left')
+		->where('CT.id', $id)
 		->get();
 		return $query->result() ? $query->row() : null;
 	}
