@@ -332,17 +332,23 @@ class Cron_handler_model extends \CI_Model {
 			'date'=>$this->date
 		]);
 		if( $task->tracking ){
-			$task->tracking->threads = $this->util->get('cron_task_threads', ['cron_task_tracking_id'=> $task->tracking->id], true);
-			if($task->tracking->threads){
-				foreach ($task->tracking->threads as $thread) {
-					$logs = $this->util->get('cron_task_thread_tracking', ['thread_id'=>$thread->id], true);
-					if($logs){
-						$thread->logs = (Object)[
-							'total' => count($logs),
-							'last' => end($logs)
-						];
-					} else {
-						$thread->logs = null;
+			$threads_done = $this->util->get('cron_task_threads', ['cron_task_tracking_id'=> $task->tracking->id, 'done' => true], true);
+			$total_done = count($threads_done);
+			$task->tracking->task_progress = "$total_done/{$task->tracking->total_threads} => %".round($total_done*100/$task->tracking->total_threads, 2);
+			$threads = $this->util->get('cron_task_threads', ['cron_task_tracking_id'=> $task->tracking->id], true);
+			if($threads){
+				foreach ($threads as $thread) {
+					if(!$thread->done){
+						$thread_name = "{$thread->from}-{$thread->to}";
+						$logs = $this->util->get('cron_task_thread_tracking', ['thread_id'=>$thread->id], true);
+						if($logs){
+							$last_log = end($logs);
+
+							$thread_status = "{$last_log->current}/{$thread->to} => %".round(($last_log->current - $thread->from)*100/$task->thread_interval, 2);
+						} else {
+							$thread_status = "0/{$thread->to} => %0.00";
+						}
+						$task->tracking->running_threads[$thread_name] = $thread_status;
 					}
 				}
 			}
