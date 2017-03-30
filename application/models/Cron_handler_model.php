@@ -80,19 +80,24 @@ class Cron_handler_model extends \CI_Model {
 					foreach ($unfinished_threads as $unfinished) {
 						$unfinished->last_log = $this->get_last_thread_tracking( $unfinished->id );
 					}
+					echolor("Sleeping.. \n");
 					sleep(15);
+					echolor("Sleep is over");
+					$candidates = [];
 					foreach ($unfinished_threads as $unfinished) {
 						$last_log = $this->get_last_thread_tracking( $unfinished->id );
 						if( $unfinished->last_log && $last_log->current == $unfinished->last_log->current ){
 							$unfinished->current = $last_log->current;
-							$this->thread = $unfinished;
-							break;
+							$candidates[] = $unfinished;
 						} else {
 							$unfinished->current = null;
-							$this->thread = $unfinished;
-							break;
+							$candidates[] = $unfinished;
 						}
 					}
+					$pick = rand(0, count($candidates)-1);
+					$this->thread = $candidates[$pick];
+					echolor("Proces restarted from {$this->thread->current}");
+					
 				}
 				break;
 			case 'ENDED':
